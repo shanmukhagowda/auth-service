@@ -19,59 +19,55 @@ import com.example.auth_service.entity.Employee;
 import com.example.auth_service.entity.User;
 import com.example.auth_service.repository.EmployeeRepository;
 import com.example.auth_service.repository.UserRepository;
-import com.example.auth_service.service.AuthenticationService;
+import com.example.auth_service.service.UserService;
 
 @RequestMapping("/auth")
 @RestController
 public class AuthenticationController {
-	
+
 	@Autowired
-	 UserRepository userRepository;
-	
+	UserRepository userRepository;
+
 	@Autowired
 	EmployeeRepository employeeRepository;
 
-private final JwtService jwtService;
-    
-    private final AuthenticationService authenticationService;
+	@Autowired
+	UserService userService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
-        this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
-    }
+	@Autowired
+	JwtService jwtService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
+	@PostMapping("/signup")
+	public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
+		User registeredUser = userService.signup(registerUserDto);
 
-        return ResponseEntity.ok(registeredUser);
-    }
+		return ResponseEntity.ok(registeredUser);
+	}
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+	@PostMapping("/login")
+	public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+		User authenticatedUser = userService.authenticate(loginUserDto);
 
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+		String jwtToken = jwtService.generateToken(authenticatedUser);
 
-        LoginResponse loginResponse = new LoginResponse(jwtToken,jwtService.getExpirationTime());
+		LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
 
-        return ResponseEntity.ok(loginResponse);
-    }
-    
-    @GetMapping("/get/user")
-    public ResponseEntity<Page<User>> getEmployees(@RequestParam(defaultValue = "0") int page,
-                                       @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(userRepository.findAll(PageRequest.of(page, size)));
-    }
-    
-    @PostMapping("/add/employee")
-    public ResponseEntity<Page<Employee>> addEmployee(@RequestParam(defaultValue = "0") int counter,
-            @RequestParam(defaultValue = "10") int maxCount) {
-    	
-//    	Employee registeredUser = employeeRepository.save(registerUserDto);
-//    	employeeRepository.addRandomEmployees();
-    	employeeRepository.addRandomEmployees(counter, maxCount);
+		return ResponseEntity.ok(loginResponse);
+	}
 
-        return ResponseEntity.ok(employeeRepository.findAll(PageRequest.of(0, 15)));
-    }
+	@GetMapping("/get/user")
+	public ResponseEntity<Page<User>> getEmployees(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		return ResponseEntity.ok(userRepository.findAll(PageRequest.of(page, size)));
+	}
+
+	@PostMapping("/add/employee")
+	public ResponseEntity<Page<Employee>> addEmployee(@RequestParam(defaultValue = "0") int counter,
+			@RequestParam(defaultValue = "10") int maxCount) {
+
+
+		employeeRepository.addRandomEmployees(counter, maxCount);
+
+		return ResponseEntity.ok(employeeRepository.findAll(PageRequest.of(0, 15)));
+	}
 }
